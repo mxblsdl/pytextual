@@ -1,5 +1,3 @@
-# A terminal user interface
+# A markdown editor
 
-Not sure of the purpose of this right now
-
-Just experimenting with the workflow and feasibility of this project
+I keep a daily log at work and wondered if I could create a markdown editor tailored to how I use my log. Experimenting with the textual framework.
