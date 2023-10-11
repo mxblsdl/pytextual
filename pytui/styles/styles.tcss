@@ -1,0 +1,17 @@
+.button {
+    # dock: center;
+    height: auto;
+}
+
+# Screen{
+#     layout: grid;
+#     grid-size: 3;   
+# }
+
+# #text {
+#     column-span:3;
+# }
+
+Button{
+    height: 20%;
+}

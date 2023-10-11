@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "pytui"
+version = "0.1.0"
+description = ""
+authors = ["mxblsdl <maxblasdel@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.scripts]
+timerapp = "pytui.app:run"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+textual = "^0.38.1"
+textual-dev = "^1.2.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
