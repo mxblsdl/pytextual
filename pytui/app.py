@@ -3,19 +3,25 @@ from time import sleep
 from pathlib import Path
 
 from textual import events
-from textual.app import App, ComposeResult, RenderResult
-from textual.widgets import Header, Footer, Static, TextArea, Button, Label
-from textual.containers import Grid, ScrollableContainer, Horizontal, VerticalScroll
-from textual.reactive import reactive
-from textual.events import Key
-
+from textual.app import App, ComposeResult
+from textual.widgets import Header, Footer, TextArea
+from textual.containers import VerticalScroll
 
 
 class Markdown(TextArea):
     def on_mount(self) -> TextArea:
-        self.load_text(f"# {self.get_date()}\n")
+        todays_date = self.get_date()
+
+        self.markdown_path = Path.home() / "daily_log.md"
+        if self.markdown_path.exists():
+            text = open(self.markdown_path).read()
+            if not todays_date in text:
+                text += f"\n\n# {todays_date}"
+            self.load_text(f"{text}\n")
+            self.cursor_location = (text.count("\n"), 0)
+            return
+        self.load_text(f"# {todays_date}\n")
         self.cursor_location = (2, 0)
-        print(self.text)
 
     def get_date(self) -> str:
         return datetime.today().strftime("%m/%d/%Y")
@@ -41,11 +47,6 @@ class Markdown(TextArea):
 class MarkdownApp(App):
     """The main application extends the app class"""
 
-    def on_key(self, event: Key):
-        if self.flag == True:
-            self.query_one("#startup").remove()
-            self.flag = not self.flag
-
     CSS_PATH = "./styles/styles.tcss"
     TITLE = "Markdown Editor"
     BINDINGS = [
@@ -57,42 +58,14 @@ class MarkdownApp(App):
         """Create child widgets for the app"""
         yield Header(show_clock=True, name="Stopwatch!")
         yield Footer()
-        # TODO save file on exit
-        # TODO read from file and load into text
-        # TODO behaviour for no press
         # TODO incorporate markdown viewer into
         yield VerticalScroll(
-            ScrollableContainer(
-                Static(
-                    "No Daily log file found. Do you want to create one?", id="message"
-                ),
-                Button.success(label="Yes", id="yes"),
-                Button.warning(label="No", id="no"),
-                id="startup",
-            ),
             Markdown(language="markdown", id="text"),
         )
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        # Do an action depending on which button was pressed
-        id = event.button.id
-        if id == "yes":
-            home_path = Path.home() / "daily_log.md"
-            home_path.touch()  #! comment out for testing
-            self.query_one("#startup").mount(
-                Label(
-                    f"Daily log file created at {str(home_path)}\nPress any key to continue"
-                ),
-                before=0,
-            )
-            self.query_one("#message").remove()
-            self.flag = True
 
     def on_mount(self) -> None:
         self.flag = False
         self.markdown_path = Path.home() / "daily_log.md"
-        if self.markdown_path.exists():
-            self.query("#startup").remove()
 
     # Actions connect to bindings with the action_* keyword
     def action_toggle_dark(self) -> None:
@@ -100,7 +73,10 @@ class MarkdownApp(App):
 
     def action_quit(self) -> None:
         t = self.query_one("#text").text
-        self.exit(message=t)
+        with open(str(self.markdown_path), "w") as log:
+            log.write(t)
+
+        self.exit()
 
 
 def run() -> None:
