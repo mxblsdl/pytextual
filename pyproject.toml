@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "pytui"
-version = "0.1.0"
-description = ""
+version = "0.2.0"
+description = "Simple daily log application"
 authors = ["mxblsdl <maxblasdel@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.scripts]
-timerapp = "pytui.app:run"
+log = "pytui.app:run"
 
 [tool.poetry.dependencies]
 python = "^3.11"
