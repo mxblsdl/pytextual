@@ -4,11 +4,11 @@ from pathlib import Path
 
 from textual import events
 from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer, TextArea
+from textual.widgets import Header, Footer, TextArea, Markdown
 from textual.containers import VerticalScroll
 
 
-class Markdown(TextArea):
+class MyTextArea(TextArea):
     def on_mount(self) -> TextArea:
         todays_date = self.get_date()
 
@@ -38,6 +38,11 @@ class Markdown(TextArea):
             self.move_cursor_relative(columns=-1)
             event.prevent_default()
 
+        if event.character == "[":
+            self.insert("[]")
+            self.move_cursor_relative(columns=-1)
+            event.prevent_default()
+
         if event.key == "enter" and self.check_for_dash():
             # self.document.newline
             self.insert("\n- ")
@@ -50,26 +55,48 @@ class MarkdownApp(App):
     CSS_PATH = "./styles/styles.tcss"
     TITLE = "Markdown Editor"
     BINDINGS = [
-        ("ctrl+d", "toggle_dark", "Toggle Dark Mode"),
+        # ("ctrl+d", "delete_line", "Delete Line"),
         ("ctrl+c", "quit", "Quit the app"),
+        ("ctrl+n", "markdown", "Markdown View"),
     ]
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the app"""
         yield Header(show_clock=True, name="Stopwatch!")
         yield Footer()
-        # TODO incorporate markdown viewer into
         yield VerticalScroll(
-            Markdown(language="markdown", id="text"),
+            MyTextArea(language="markdown", id="text"),
+            Markdown(id="viewer"),
+            id="editor",
         )
 
     def on_mount(self) -> None:
+        self.query_one("#viewer").styles.height = "0"
+
         self.flag = False
+        self.viewer = False
         self.markdown_path = Path.home() / "daily_log.md"
+        self.set_focus(self.query_one("#text"))
 
     # Actions connect to bindings with the action_* keyword
-    def action_toggle_dark(self) -> None:
-        self.dark = not self.dark
+    # def action_toggle_dark(self) -> None:
+    #     text = self.query_one("text")
+
+    def action_markdown(self) -> None:
+        if self.viewer:
+            text = "100%"
+            viewer = "0"
+        else:
+            text = "0"
+            viewer = "100%"
+        self.viewer = not self.viewer
+
+        text_comp = self.query_one("#text")
+        text_comp.styles.height = text
+
+        viewer_comp = self.query_one("#viewer")
+        viewer_comp.styles.height = viewer
+        viewer_comp.update(text_comp.text)
 
     def action_quit(self) -> None:
         t = self.query_one("#text").text
@@ -90,6 +117,5 @@ def run() -> None:
 
 if __name__ == "__main__":
     MarkdownApp().run()
-
 
 # textual run --dev app.py
