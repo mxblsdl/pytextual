@@ -1,5 +1,4 @@
 from datetime import datetime
-from time import sleep
 from pathlib import Path
 
 from textual import events
@@ -77,10 +76,6 @@ class MarkdownApp(App):
         self.viewer = False
         self.markdown_path = Path.home() / "daily_log.md"
         self.set_focus(self.query_one("#text"))
-
-    # Actions connect to bindings with the action_* keyword
-    # def action_toggle_dark(self) -> None:
-    #     text = self.query_one("text")
 
     def action_markdown(self) -> None:
         if self.viewer:
